@@ -34,6 +34,7 @@ func main() {
 	saveToFile(resultStr, *asciiOutput)
 
 	AsciiToHTML(resultStr, *htmlOutput)
+	//AsciiToHTMLWithColor(resizeImage, resultStr, *htmlOutput)
 	AsciiToImage(resultStr, *imageOutput)
 }
 
@@ -194,6 +195,65 @@ func AsciiToHTML(ascii []string, outputPath string) {
 		}
 	}
 }
+
+func AsciiToHTMLWithColor(img image.Image, ascii []string, outputPath string) {
+	HtmlFile, err := os.Create(outputPath)
+	if err != nil {
+		fmt.Println("Error while creating HTML file")
+		os.Exit(1)
+	}
+	defer HtmlFile.Close()
+
+	_, err = HtmlFile.WriteString(`<!DOCTYPE html>
+		<html lang="en"><head>
+    	<meta charset="UTF-8">
+    	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    	<title>Color ASCII Art</title>
+		</head>
+		<body style="font-family: monospace; line-height: 1; white-space: pre;">`)
+	if err != nil {
+		fmt.Println("Error while writing to HTML file")
+		os.Exit(1)
+	}
+
+	bounds := img.Bounds()
+
+	for y, line := range ascii {
+		for x := 0; x < len(line); x++ {
+			imgX := x
+			imgY := y
+			if imgY >= bounds.Max.Y || imgX >= bounds.Max.X {
+				continue
+			}
+
+			r, g, b, _ := img.At(imgX, imgY).RGBA()
+
+			r8 := uint8(r >> 8)
+			g8 := uint8(g >> 8)
+			b8 := uint8(b >> 8)
+
+			char := string(line[x])
+			htmlString := fmt.Sprintf(`<span style="color: rgb(%d,%d,%d);">%s</span>`, r8, g8, b8, char)
+			_, err := HtmlFile.WriteString(htmlString)
+			if err != nil {
+				fmt.Println("Error while writing to HTML file")
+				os.Exit(1)
+			}
+		}
+		_, err = HtmlFile.WriteString("<br>")
+		if err != nil {
+			fmt.Println("Error while writing to HTML file")
+			os.Exit(1)
+		}
+	}
+
+	_, err = HtmlFile.WriteString(`</body></html>`)
+	if err != nil {
+		fmt.Println("Error while closing HTML file")
+		os.Exit(1)
+	}
+}
+
 
 func AsciiToImage(strArray []string, outputPath string) {
 	fontImage := image.NewRGBA(image.Rect(0, 0, 1400, len(strArray)*11))
