@@ -36,7 +36,7 @@ go test
 
 ## Requirements
 
-- Go 1.18+
+- Go 1.23+
 - Go image package
 
 ## License
