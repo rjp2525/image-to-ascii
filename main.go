@@ -93,13 +93,23 @@ func MapAscii(img image.Image) []string {
 	asciiChar := "$@B%#*+=,. "
 
 	bound := img.Bounds()
-	height, width := bound.Max.Y, bound.Max.X
-	result := make([]string, height)
+	width := bound.Max.X
+	height := bound.Max.Y
 
-	for y := bound.Min.Y; y < height; y++ {
+	imageAspectRatio := float64(width) / float64(height)
+
+	charAspectRatio := 2.0
+
+	adjustedHeight := int(float64(height) / (charAspectRatio / imageAspectRatio))
+
+	result := make([]string, adjustedHeight)
+
+	for y := 0; y < adjustedHeight; y++ {
 		line := ""
-		for x := bound.Min.X; x < width; x++ {
-			pixelValue := color.GrayModel.Convert(img.At(x, y)).(color.Gray)
+		for x := 0; x < width; x++ {
+			imgY := int(float64(y) * (float64(height) / float64(adjustedHeight)))
+
+			pixelValue := color.GrayModel.Convert(img.At(x, imgY)).(color.Gray)
 			pixel := pixelValue.Y
 			asciiIndex := int(pixel) * (len(asciiChar) - 1) / 255
 			line += string(asciiChar[asciiIndex])
@@ -108,6 +118,7 @@ func MapAscii(img image.Image) []string {
 	}
 	return result
 }
+
 
 func saveToFile(asciiArt []string, filename string) error {
 	file, err := os.Create(filename)
