@@ -28,6 +28,12 @@ go run main.go -input=input.png -resize_output=resize.png -gray_output=gray.png 
 | `-html_output`   | Path to save the ASCII art as an HTML file      | `result.html`   |
 | `-image_output`  | Path to save the ASCII art rendered as an image | `output.png`    |
 
+## Running Tests
+
+```bash
+go test
+```
+
 ## Requirements
 
 - Go 1.18+
